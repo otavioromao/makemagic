@@ -7,6 +7,9 @@ package br.challenge.makemagic;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * This class is responsible to start the application by Sprint Boot.
+ */
 @SpringBootApplication
 public class MakeMagicApplication
 {
