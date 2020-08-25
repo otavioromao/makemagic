@@ -1,0 +1,492 @@
+{
+	"info": {
+		"_postman_id": "bf86b595-9577-4741-aa9f-bb8db741d488",
+		"name": "MakeMagic_REST_API_Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create a character",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "fe32417b-034a-4cfb-8b40-c42ef6e457bf",
+						"exec": [
+							"var characterPayload = pm.response.json();\r",
+							"\r",
+							"pm.globals.set(\"characterId\", characterPayload.id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Harry Potter\",\n    \"role\": \"student\",\n    \"school\": \"Hogwarts School of Witchcraft and Wizardry\",\n    \"house\": \"5a05e2b252f721a3cf2ea33f\",\n    \"patronus\": \"stag\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/public/character",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"public",
+						"character"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a character with invalid house Id",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Harry Potter\",\n    \"role\": \"student\",\n    \"school\": \"Hogwarts School of Witchcraft and Wizardry\",\n    \"house\": \"invalid\",\n    \"patronus\": \"stag\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/public/character",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"public",
+						"character"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a character with empty payload",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/public/character",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"public",
+						"character"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all characters",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/v1/public/character",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"public",
+						"character"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a character with house Id",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/v1/public/character?house=5a05e2b252f721a3cf2ea33f",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"public",
+						"character"
+					],
+					"query": [
+						{
+							"key": "house",
+							"value": "5a05e2b252f721a3cf2ea33f"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update a character with patch",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 18,\r\n    \"name\": \"Harry Potter\",\r\n    \"role\": \"student\",\r\n    \"school\": \"Hogwarts School of Witchcraft and Wizardry\",\r\n    \"house\": \"5a05e2b252f721a3cf2ea33f\",\r\n    \"patronus\": \"stag\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/public/character/{{characterId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"public",
+						"character",
+						"{{characterId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update a character with invalid Id",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Harry Potter\",\n    \"role\": \"student2\",\n    \"school\": \"Hogwarts School of Witchcraft and Wizardry\",\n    \"house\": \"5a05e2b252f721a3cf2ea33f\",\n    \"patronus\": \"stag\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/public/character/AAA",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"public",
+						"character",
+						"AAA"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update a character with put",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 18,\r\n    \"name\": \"Harry Potter\",\r\n    \"role\": \"student\",\r\n    \"school\": \"Hogwarts School of Witchcraft and Wizardry\",\r\n    \"house\": \"5a05e2b252f721a3cf2ea33f\",\r\n    \"patronus\": \"stag\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/public/character/{{characterId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"public",
+						"character",
+						"{{characterId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete a character",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/v1/public/character/{{characterId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"public",
+						"character",
+						"{{characterId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete a character with invalid Id",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/v1/public/character/AA",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"public",
+						"character",
+						"AA"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "https://www.potterapi.com/v1/sortingHat",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://www.potterapi.com/v1/sortingHat",
+					"protocol": "https",
+					"host": [
+						"www",
+						"potterapi",
+						"com"
+					],
+					"path": [
+						"v1",
+						"sortingHat"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "https://www.potterapi.com/v1/characters",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://www.potterapi.com/v1/characters?key=$2a$10$6D9c32fihcoTjrIGkgq3IeXxNO2d4kQBfhOWmjTYEGePtjg4CPzSa",
+					"protocol": "https",
+					"host": [
+						"www",
+						"potterapi",
+						"com"
+					],
+					"path": [
+						"v1",
+						"characters"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "$2a$10$6D9c32fihcoTjrIGkgq3IeXxNO2d4kQBfhOWmjTYEGePtjg4CPzSa"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "https://www.potterapi.com/v1/houses?key=$2a$10$6D9c32fihcoTjrIGkgq3IeXxNO2d4kQBfhOWmjTYEGePtjg4CPzSa",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"connection": true,
+					"accept-encoding": true,
+					"user-agent": true,
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://www.potterapi.com/v1/houses/5a05e2b252f721a3cf2ea33f?key=$2a$10$6D9c32fihcoTjrIGkgq3IeXxNO2d4kQBfhOWmjTYEGePtjg4CPzSa",
+					"protocol": "https",
+					"host": [
+						"www",
+						"potterapi",
+						"com"
+					],
+					"path": [
+						"v1",
+						"houses",
+						"5a05e2b252f721a3cf2ea33f"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "$2a$10$6D9c32fihcoTjrIGkgq3IeXxNO2d4kQBfhOWmjTYEGePtjg4CPzSa"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "https://www.potterapi.com/v1/spells?key=$2a$10$6D9c32fihcoTjrIGkgq3IeXxNO2d4kQBfhOWmjTYEGePtjg4CPzSa",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://www.potterapi.com/v1/spells?key=$2a$10$6D9c32fihcoTjrIGkgq3IeXxNO2d4kQBfhOWmjTYEGePtjg4CPzSa",
+					"protocol": "https",
+					"host": [
+						"www",
+						"potterapi",
+						"com"
+					],
+					"path": [
+						"v1",
+						"spells"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "$2a$10$6D9c32fihcoTjrIGkgq3IeXxNO2d4kQBfhOWmjTYEGePtjg4CPzSa"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

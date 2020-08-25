@@ -45,9 +45,9 @@ import br.challenge.makemagic.character.repository.CharacterRepository;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class CharacterControllerTest
 {
-    private static final String CHARACTER_ENTRY_POINT = "http://localhost:%s/character";
-    private static final String CHARACTER_ENTRY_POINT_FOR_GET = "http://localhost:%s/character?house={house}";
-    private static final String CHARACTER_ENTRY_POINT_FOR_UPDATE_DELETE = "http://localhost:%s/character/%s";
+    private static final String CHARACTER_ENTRY_POINT = "http://localhost:%s/v1/public/character";
+    private static final String CHARACTER_ENTRY_POINT_FOR_GET = "http://localhost:%s/v1/public/character?house={house}";
+    private static final String CHARACTER_ENTRY_POINT_FOR_UPDATE_DELETE = "http://localhost:%s/v1/public/character/%s";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String HANNAH_ABBOTT_NAME_VALUE = "Hannah Abbott";
     private static final String HARRY_POTTER_NAME_VALUE = "Harry Potter";
