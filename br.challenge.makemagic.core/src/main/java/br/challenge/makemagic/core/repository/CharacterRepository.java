@@ -2,20 +2,20 @@
 // This is intended to solve a challenge to create a REST API to offers
 // CRUD functionalities for Harry Potter's characters.
 // **********************************************************************
-package br.challenge.makemagic.character.repository;
+package br.challenge.makemagic.core.repository;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.repository.CrudRepository;
 
-import br.challenge.makemagic.character.model.entity.CharacterEntity;
+import br.challenge.makemagic.core.model.CharacterEntity;
 
 /**
  * This interface is responsible to give support for CRUD functionalities for
  * {@link CharacterEntity Character}.
  */
-public interface CharacterRepository extends CrudRepository<CharacterEntity, Long>
+public interface CharacterRepository extends CrudRepository<CharacterEntity, String>
 {
     /**
      * Finds the characters that are related to a house.

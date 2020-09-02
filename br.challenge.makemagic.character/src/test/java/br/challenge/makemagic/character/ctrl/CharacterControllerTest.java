@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -29,7 +31,6 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -39,9 +40,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import br.challenge.makemagic.character.model.entity.CharacterEntity;
-import br.challenge.makemagic.character.repository.CharacterRepository;
+import br.challenge.makemagic.character.service.CharacterService;
+import br.challenge.makemagic.core.model.CharacterEntity;
 
+/**
+ * This class is responsible to test {@link CharacterController}.
+ */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class CharacterControllerTest
 {
@@ -67,10 +71,7 @@ public class CharacterControllerTest
     private static final String STUDENT_VALUE = "student";
 
     @Mock
-    private CharacterRepository repository;
-
-    @Mock
-    private HouseRestClient houseRestClient;
+    private CharacterService characterService;
 
     @InjectMocks
     private CharacterController characterController = new CharacterController();
@@ -92,11 +93,11 @@ public class CharacterControllerTest
 	characters.add(characterOne);
 	characters.add(characterTwo);
 
-	when(repository.findAll()).thenReturn(characters);
+	when(characterService.findAll()).thenReturn(characters);
 
 	ResponseEntity<Iterable<CharacterEntity>> response = characterController.getCharacter(null);
 
-	assertEquals(response.getStatusCode(), HttpStatus.OK);
+	assertEquals(HttpStatus.OK, response.getStatusCode());
 	assertNotNull(response.getBody());
 	assertIterableEquals(response.getBody(), characters);
     }
@@ -113,11 +114,11 @@ public class CharacterControllerTest
 	characters.add(characterOne);
 	characters.add(characterTwo);
 
-	when(repository.findByHouse(HOUSE_VALUE)).thenReturn(characters);
+	when(characterService.findByHouse(HOUSE_VALUE)).thenReturn(characters);
 
 	ResponseEntity<Iterable<CharacterEntity>> response = characterController.getCharacter(HOUSE_VALUE);
 
-	assertEquals(response.getStatusCode(), HttpStatus.OK);
+	assertEquals(HttpStatus.OK, response.getStatusCode());
 	assertNotNull(response.getBody());
 	assertIterableEquals(response.getBody(), characters);
     }
@@ -128,14 +129,14 @@ public class CharacterControllerTest
 	CharacterEntity character = createCharacterEntity(HARRY_POTTER_NAME_VALUE, STUDENT_VALUE, SCHOOL_NAME_VALUE,
 		HOUSE_VALUE, PATRONUS_VALUE);
 
-	when(repository.save(character)).thenReturn(character);
-	when(houseRestClient.verifyHouseId(HOUSE_VALUE)).thenReturn(true);
+	when(characterService.addCharacter(character)).thenReturn(character);
+	when(characterService.verifyHouseId(HOUSE_VALUE)).thenReturn(true);
 
 	@SuppressWarnings("unchecked")
 	ResponseEntity<CharacterEntity> response = (ResponseEntity<CharacterEntity>) characterController
 		.createCharacter(character);
 
-	assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+	assertEquals(HttpStatus.CREATED, response.getStatusCode());
 	assertNotNull(response.getBody());
 	assertEquals(response.getBody(), character);
     }
@@ -145,7 +146,7 @@ public class CharacterControllerTest
     {
 	ResponseEntity<?> response = characterController.createCharacter(null);
 
-	assertEquals(response.getStatusCode(), HttpStatus.NOT_ACCEPTABLE);
+	assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
 	assertNull(response.getBody());
     }
 
@@ -155,17 +156,16 @@ public class CharacterControllerTest
 	CharacterEntity character = createCharacterEntity(HARRY_POTTER_NAME_VALUE, STUDENT_VALUE, SCHOOL_NAME_VALUE,
 		HOUSE_VALUE, PATRONUS_VALUE);
 
-	when(repository.save(character)).thenReturn(character);
-	when(houseRestClient.verifyHouseId(HOUSE_VALUE)).thenReturn(true);
+	when(characterService.updateCharacter(any(CharacterEntity.class), anyString())).thenReturn(character);
+	when(characterService.verifyHouseId(HOUSE_VALUE)).thenReturn(true);
 
 	@SuppressWarnings("unchecked")
 	ResponseEntity<CharacterEntity> response = (ResponseEntity<CharacterEntity>) characterController
 		.patchCharacter(character, ID_VALUE);
 
-	assertEquals(response.getStatusCode(), HttpStatus.OK);
+	assertEquals(HttpStatus.OK, response.getStatusCode());
 	assertNotNull(response.getBody());
 	assertEquals(response.getBody(), character);
-	assertEquals(response.getBody().getId(), Long.valueOf(ID_VALUE));
     }
 
     @Test
@@ -174,9 +174,12 @@ public class CharacterControllerTest
 	CharacterEntity character = createCharacterEntity(HARRY_POTTER_NAME_VALUE, STUDENT_VALUE, SCHOOL_NAME_VALUE,
 		HOUSE_VALUE, PATRONUS_VALUE);
 
+	when(characterService.updateCharacter(any(CharacterEntity.class), anyString())).thenReturn(null);
+	when(characterService.verifyHouseId(HOUSE_VALUE)).thenReturn(true);
+
 	ResponseEntity<?> response = characterController.patchCharacter(character, INVALID_ID_VALUE);
 
-	assertEquals(response.getStatusCode(), HttpStatus.NOT_ACCEPTABLE);
+	assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
 	assertNull(response.getBody());
     }
 
@@ -188,7 +191,7 @@ public class CharacterControllerTest
 
 	ResponseEntity<?> response = characterController.patchCharacter(character, null);
 
-	assertEquals(response.getStatusCode(), HttpStatus.NOT_ACCEPTABLE);
+	assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
 	assertNull(response.getBody());
     }
 
@@ -197,7 +200,7 @@ public class CharacterControllerTest
     {
 	ResponseEntity<?> response = characterController.patchCharacter(null, ID_VALUE);
 
-	assertEquals(response.getStatusCode(), HttpStatus.NOT_ACCEPTABLE);
+	assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
 	assertNull(response.getBody());
     }
 
@@ -207,17 +210,16 @@ public class CharacterControllerTest
 	CharacterEntity character = createCharacterEntity(HARRY_POTTER_NAME_VALUE, STUDENT_VALUE, SCHOOL_NAME_VALUE,
 		HOUSE_VALUE, PATRONUS_VALUE);
 
-	when(repository.save(character)).thenReturn(character);
-	when(houseRestClient.verifyHouseId(HOUSE_VALUE)).thenReturn(true);
+	when(characterService.updateCharacter(any(CharacterEntity.class), anyString())).thenReturn(character);
+	when(characterService.verifyHouseId(HOUSE_VALUE)).thenReturn(true);
 
 	@SuppressWarnings("unchecked")
 	ResponseEntity<CharacterEntity> response = (ResponseEntity<CharacterEntity>) characterController
 		.putCharacter(character, ID_VALUE);
 
-	assertEquals(response.getStatusCode(), HttpStatus.OK);
+	assertEquals(HttpStatus.OK, response.getStatusCode());
 	assertNotNull(response.getBody());
 	assertEquals(response.getBody(), character);
-	assertEquals(response.getBody().getId(), Long.valueOf(ID_VALUE));
     }
 
     @Test
@@ -226,9 +228,12 @@ public class CharacterControllerTest
 	CharacterEntity character = createCharacterEntity(HARRY_POTTER_NAME_VALUE, STUDENT_VALUE, SCHOOL_NAME_VALUE,
 		HOUSE_VALUE, PATRONUS_VALUE);
 
+	when(characterService.updateCharacter(any(CharacterEntity.class), anyString())).thenReturn(null);
+	when(characterService.verifyHouseId(HOUSE_VALUE)).thenReturn(true);
+
 	ResponseEntity<?> response = characterController.putCharacter(character, INVALID_ID_VALUE);
 
-	assertEquals(response.getStatusCode(), HttpStatus.NOT_ACCEPTABLE);
+	assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
 	assertNull(response.getBody());
     }
 
@@ -240,7 +245,7 @@ public class CharacterControllerTest
 
 	ResponseEntity<?> response = characterController.putCharacter(character, null);
 
-	assertEquals(response.getStatusCode(), HttpStatus.NOT_ACCEPTABLE);
+	assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
 	assertNull(response.getBody());
     }
 
@@ -249,7 +254,7 @@ public class CharacterControllerTest
     {
 	ResponseEntity<?> response = characterController.putCharacter(null, ID_VALUE);
 
-	assertEquals(response.getStatusCode(), HttpStatus.NOT_ACCEPTABLE);
+	assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
 	assertNull(response.getBody());
     }
 
@@ -258,13 +263,13 @@ public class CharacterControllerTest
     {
 	String id = ID_VALUE;
 
-	Mockito.doNothing().when(repository).deleteById(Long.valueOf(id));
+	when(characterService.deleteCharacter(anyString())).thenReturn(true);
 
 	@SuppressWarnings("unchecked")
 	ResponseEntity<CharacterEntity> response = (ResponseEntity<CharacterEntity>) characterController
 		.deleteCharacterById(id);
 
-	assertEquals(response.getStatusCode(), HttpStatus.NO_CONTENT);
+	assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
 	assertNull(response.getBody());
     }
 
@@ -273,7 +278,7 @@ public class CharacterControllerTest
     {
 	ResponseEntity<?> response = characterController.deleteCharacterById(null);
 
-	assertEquals(response.getStatusCode(), HttpStatus.NOT_ACCEPTABLE);
+	assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
 	assertNull(response.getBody());
     }
 
@@ -282,7 +287,7 @@ public class CharacterControllerTest
     {
 	ResponseEntity<?> response = characterController.deleteCharacterById(INVALID_ID_VALUE);
 
-	assertEquals(response.getStatusCode(), HttpStatus.NOT_ACCEPTABLE);
+	assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 	assertNull(response.getBody());
     }
 
@@ -306,7 +311,7 @@ public class CharacterControllerTest
     private CharacterEntity createCharacterEntity(String name, String role, String school, String house,
 	    String patronus)
     {
-	return new CharacterEntity(name, role, school, house, patronus);
+	return CharacterEntity.builder().name(name).role(role).school(school).house(house).patronus(patronus).build();
     }
 
     private CharacterEntity createCharacterForIntegrationTest()
@@ -329,7 +334,7 @@ public class CharacterControllerTest
 	@SuppressWarnings("unchecked")
 	ResponseEntity<CharacterEntity> responseEntity = (ResponseEntity<CharacterEntity>) response;
 
-	assertEquals(responseEntity.getStatusCode(), HttpStatus.CREATED);
+	assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
 	assertNotNull(responseEntity.getBody());
 	assertNotNull(responseEntity.getBody().getId());
 
@@ -362,7 +367,7 @@ public class CharacterControllerTest
 	HttpResponse response = client.execute(patchRequest);
 
 	assertNotNull(response);
-	assertEquals(response.getStatusLine().getStatusCode(), HttpStatus.OK.value());
+	assertEquals(HttpStatus.OK.value(), response.getStatusLine().getStatusCode());
     }
 
     private void putCharacterForIntegrationTest(CharacterEntity characterEntity)
@@ -391,7 +396,7 @@ public class CharacterControllerTest
 	HttpResponse response = client.execute(putRequest);
 
 	assertNotNull(response);
-	assertEquals(response.getStatusLine().getStatusCode(), HttpStatus.OK.value());
+	assertEquals(HttpStatus.OK.value(), response.getStatusLine().getStatusCode());
     }
 
     public CharacterEntity getCharacterByHouseForIntegrationTest()

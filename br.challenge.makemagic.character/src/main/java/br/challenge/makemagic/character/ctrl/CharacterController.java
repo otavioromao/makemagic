@@ -7,7 +7,6 @@ package br.challenge.makemagic.character.ctrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import br.challenge.makemagic.character.exception.handling.ErrorMessage;
-import br.challenge.makemagic.character.model.entity.CharacterEntity;
-import br.challenge.makemagic.character.repository.CharacterRepository;
+import br.challenge.makemagic.character.service.CharacterService;
+import br.challenge.makemagic.core.model.CharacterEntity;
 
 /**
  * This class is responsible to give support for REST API for CRUD
@@ -39,10 +38,7 @@ public class CharacterController
     private static final String HOUSE_ERROR_MESSAGE = "The house Id is not valid: %s";
 
     @Autowired
-    private HouseRestClient houseRestClient;
-
-    @Autowired
-    private CharacterRepository repository;
+    private CharacterService characterService;
 
     /**
      * Returns a list of all characters or a list of characters related to a house
@@ -60,12 +56,12 @@ public class CharacterController
 	{
 	    LOG.debug("Find characters by house {0}", house);
 
-	    characters = repository.findByHouse(house);
+	    characters = characterService.findByHouse(house);
 	} else
 	{
 	    LOG.debug("Find all characters", "");
 
-	    characters = repository.findAll();
+	    characters = characterService.findAll();
 	}
 
 	return new ResponseEntity<>(characters, HttpStatus.OK);
@@ -90,7 +86,19 @@ public class CharacterController
 	    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 	}
 
-	return addCharacter(character);
+	if (!characterService.verifyHouseId(character.getHouse()))
+	{
+	    ErrorMessage errorMessage = new ErrorMessage(HttpStatus.BAD_REQUEST,
+		    String.format(HOUSE_ERROR_MESSAGE, character.getHouse()));
+
+	    return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+	}
+
+	LOG.debug("Save character {0}", character);
+
+	CharacterEntity characterSaved = characterService.addCharacter(character);
+
+	return new ResponseEntity<CharacterEntity>(characterSaved, HttpStatus.CREATED);
     }
 
     /**
@@ -114,7 +122,24 @@ public class CharacterController
 	    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 	}
 
-	return updateCharacter(character, id);
+	if (!characterService.verifyHouseId(character.getHouse()))
+	{
+	    ErrorMessage errorMessage = new ErrorMessage(HttpStatus.BAD_REQUEST,
+		    String.format(HOUSE_ERROR_MESSAGE, character.getHouse()));
+
+	    return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+	}
+
+	LOG.debug("Save character {0}", character);
+
+	CharacterEntity characterSaved = characterService.updateCharacter(character, id);
+
+	if (characterSaved == null)
+	{
+	    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+	}
+
+	return new ResponseEntity<CharacterEntity>(characterSaved, HttpStatus.OK);
     }
 
     /**
@@ -138,7 +163,25 @@ public class CharacterController
 	    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 	}
 
-	return updateCharacter(character, id);
+	if (!characterService.verifyHouseId(character.getHouse()))
+	{
+	    ErrorMessage errorMessage = new ErrorMessage(HttpStatus.BAD_REQUEST,
+		    String.format(HOUSE_ERROR_MESSAGE, character.getHouse()));
+
+	    return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+	}
+
+	LOG.debug("Save character {0}", character);
+
+	CharacterEntity characterSaved = characterService.updateCharacter(character, id);
+
+	if (characterSaved == null)
+	{
+	    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+	}
+
+	return new ResponseEntity<CharacterEntity>(characterSaved, HttpStatus.OK);
+
     }
 
     /**
@@ -159,98 +202,10 @@ public class CharacterController
 	    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 	}
 
-	return deleteCharacter(id);
-    }
-
-    /**
-     * Saves the character in the storage using the CharacterRepository.
-     *
-     * @param character The CharacterEntity with the character informations
-     * @return The ResponseEntity with the character created and HttpStatus created.
-     *         If the request body is null then a Not Acceptable status is returned.
-     *         If the Id of the house is invalid, then a Bad Request status is
-     *         returned
-     */
-    private ResponseEntity<?> addCharacter(CharacterEntity character)
-    {
-	if (!houseRestClient.verifyHouseId(character.getHouse()))
+	if (characterService.deleteCharacter(id))
 	{
-	    ErrorMessage errorMessage = new ErrorMessage(HttpStatus.BAD_REQUEST,
-		    String.format(HOUSE_ERROR_MESSAGE, character.getHouse()));
-
-	    return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+	    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
-
-	LOG.debug("Save character {0}", character);
-
-	CharacterEntity characterSaved = repository.save(character);
-
-	return new ResponseEntity<CharacterEntity>(characterSaved, HttpStatus.CREATED);
-    }
-
-    /**
-     * Saves the character in the storage using the CharacterRepository.
-     *
-     * @param character The CharacterEntity with the character informations
-     * @param id        The Id of the character
-     * @return The ResponseEntity with the character updated and HttpStatus OK. If
-     *         the request body is null or the Id is invalid, then a Not Acceptable
-     *         status is returned. If the Id of the house is invalid, then a Bad
-     *         Request status is returned
-     */
-    private ResponseEntity<?> updateCharacter(CharacterEntity character, String id)
-    {
-	try
-	{
-	    character.setId(Long.valueOf(id));
-	} catch (NumberFormatException e)
-	{
-	    LOG.debug("Invalid Id {0}", id);
-
-	    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
-	}
-
-	if (!houseRestClient.verifyHouseId(character.getHouse()))
-	{
-	    ErrorMessage errorMessage = new ErrorMessage(HttpStatus.BAD_REQUEST,
-		    String.format(HOUSE_ERROR_MESSAGE, character.getHouse()));
-
-	    return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
-	}
-
-	LOG.debug("Save character {0}", character);
-
-	CharacterEntity characterSaved = repository.save(character);
-
-	return new ResponseEntity<CharacterEntity>(characterSaved, HttpStatus.OK);
-    }
-
-    /**
-     * Deletes the character from the storage using the CharacterRepository.
-     *
-     * @param id The Id of the character
-     * @return The ResponseEntity with No Content status. If the Id is invalid, then
-     *         a Not Acceptable status is returned. If there is no character with
-     *         the Id, then a Not Found status is returned
-     */
-    private ResponseEntity<?> deleteCharacter(String id)
-    {
-	try
-	{
-	    repository.deleteById(Long.valueOf(id));
-	} catch (NumberFormatException e)
-	{
-	    LOG.debug("Invalid Id {0}", id);
-
-	    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
-	} catch (EmptyResultDataAccessException e)
-	{
-	    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-	} catch (Exception e)
-	{
-	    LOG.debug("Exception {0}", e);
-	}
-
-	return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

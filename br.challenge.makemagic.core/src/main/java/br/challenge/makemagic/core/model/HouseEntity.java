@@ -2,7 +2,7 @@
 // This is intended to solve a challenge to create a REST API to offers
 // CRUD functionalities for Harry Potter's characters.
 // **********************************************************************
-package br.challenge.makemagic.character.model.entity;
+package br.challenge.makemagic.core.model;
 
 /**
  * This class Specifies the house information.
