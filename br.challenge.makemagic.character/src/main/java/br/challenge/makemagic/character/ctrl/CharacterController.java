@@ -30,7 +30,7 @@ import br.challenge.makemagic.core.model.CharacterEntity;
  * functionalities for {@link CharacterEntity Character}.
  */
 @Controller
-@RequestMapping(path = "/v1/public/character")
+@RequestMapping(path = "/v1/character")
 public class CharacterController
 {
     private Logger LOG = LoggerFactory.getLogger(CharacterController.class);

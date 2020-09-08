@@ -13,19 +13,22 @@
 
 	<groupId>br.challenge.makemagic</groupId>
 	<artifactId>br.challenge.makemagic-parent</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.1-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
 	<properties>
+		<br.challenge.makemagic.version>1.0.1-SNAPSHOT</br.challenge.makemagic.version>
 		<java.version>1.8</java.version>
-		<org.hamcrest_hamcrest>2.1</org.hamcrest_hamcrest>
+		<org.hamcrest_hamcrest.version>2.1</org.hamcrest_hamcrest.version>
+		<spring-cloud-dependencies.version>Hoxton.SR8</spring-cloud-dependencies.version>
 	</properties>
 
 	<modules>
-		<module>br.challenge.makemagic.core</module>
 		<module>br.challenge.makemagic.eureka</module>
+		<module>br.challenge.makemagic.core</module>
 		<module>br.challenge.makemagic.character</module>
+		<module>br.challenge.makemagic.gateway</module>
 	</modules>
 
 	<dependencies>
@@ -62,19 +65,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webflux</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -91,15 +86,22 @@
 		</dependency>
 
 		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud-dependencies.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 </project>
