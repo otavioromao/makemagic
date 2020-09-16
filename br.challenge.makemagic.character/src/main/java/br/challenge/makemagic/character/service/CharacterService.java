@@ -4,32 +4,37 @@
 // **********************************************************************
 package br.challenge.makemagic.character.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import br.challenge.makemagic.character.ctrl.HouseRestClient;
+import br.challenge.makemagic.character.dto.CharacterEntityDto;
 import br.challenge.makemagic.core.model.CharacterEntity;
 import br.challenge.makemagic.core.repository.CharacterRepository;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * This class is responsible to give support for services for
- * {@link CharacterEntity Character}.
+ * {@link CharacterEntityDto Character}.
  */
 @Service
 @Slf4j
 //@RequiredArgsConstructor(onConstructor = @Autowired)
 public class CharacterService
 {
-    private static final String HOUSE_ERROR_MESSAGE = "The house Id is not valid: %s";
-
     @Autowired
     private HouseRestClient houseRestClient;
 
     @Autowired
     private CharacterRepository repository;
+
+    private ModelMapper modelMapper = new ModelMapper();
 
     /**
      * Returns a list of characters related to a house Id.
@@ -37,9 +42,9 @@ public class CharacterService
      * @param house The Id of the house, it can be null
      * @return The ResponseEntity with a list of characters and HttpStatus OK
      */
-    public Iterable<CharacterEntity> findByHouse(String house)
+    public Iterable<CharacterEntityDto> findByHouse(String house)
     {
-	return repository.findByHouse(house);
+	return mapCharacterEntityList(repository.findByHouse(house));
     }
 
     /**
@@ -48,54 +53,59 @@ public class CharacterService
      * @param house The Id of the house, it can be null
      * @return The ResponseEntity with a list of characters and HttpStatus OK
      */
-    public Iterable<CharacterEntity> findAll()
+    public Iterable<CharacterEntityDto> findAll()
     {
-	return repository.findAll();
+	return mapCharacterEntityList(repository.findAll());
     }
 
     /**
      * Saves the character in the storage using the CharacterRepository.
      *
-     * @param character The CharacterEntity with the character informations
+     * @param characterEntityDto The CharacterEntity with the character informations
      * @return The ResponseEntity with the character created and HttpStatus created.
      *         If the request body is null then a Not Acceptable status is returned.
      *         If the Id of the house is invalid, then a Bad Request status is
      *         returned
      */
-    public CharacterEntity addCharacter(CharacterEntity character)
+    public CharacterEntityDto addCharacter(CharacterEntityDto characterEntityDto)
     {
-	if (StringUtils.isEmpty(character))
+	if (StringUtils.isEmpty(characterEntityDto))
 	{
 	    return null;
 	}
 
-	log.debug("Save character {0}", character);
+	log.debug("Save character {}", characterEntityDto);
 
-	if (verifyHouseId(character.getHouse()))
+	if (verifyHouseId(characterEntityDto.getHouse()))
 	{
-	    return repository.save(character);
+	    CharacterEntity characterEntity = mapCharacterEntityDtoToCharacterEntity(characterEntityDto);
+
+	    characterEntity = repository.save(characterEntity);
+
+	    return mapCharacterEntityToCharacterEntityDto(characterEntity);
 	}
+
 	return null;
     }
 
     /**
      * Saves the character in the storage using the CharacterRepository.
      *
-     * @param character The CharacterEntity with the character informations
-     * @param id        The Id of the character
+     * @param characterEntityDto The CharacterEntity with the character informations
+     * @param id                 The Id of the character
      * @return The ResponseEntity with the character updated and HttpStatus OK. If
      *         the request body is null or the Id is invalid, then a Not Acceptable
      *         status is returned. If the Id of the house is invalid, then a Bad
      *         Request status is returned
      */
-    public CharacterEntity updateCharacter(CharacterEntity character, String id)
+    public CharacterEntityDto updateCharacter(CharacterEntityDto characterEntityDto, String id)
     {
-	if (StringUtils.isEmpty(character) || StringUtils.isEmpty(id))
+	if (StringUtils.isEmpty(characterEntityDto) || StringUtils.isEmpty(id))
 	{
 	    return null;
 	}
 
-	character.setId(id);
+	characterEntityDto.setId(id);
 
 //	if (!houseRestClient.verifyHouseId(character.getHouse()))
 //	{
@@ -105,12 +115,17 @@ public class CharacterService
 //	    return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
 //	}
 
-	log.debug("Save character {0}", character);
+	log.debug("Save character {0}", characterEntityDto);
 
-	if (verifyHouseId(character.getHouse()))
+	if (verifyHouseId(characterEntityDto.getHouse()))
 	{
-	    return repository.save(character);
+	    CharacterEntity characterEntity = mapCharacterEntityDtoToCharacterEntity(characterEntityDto);
+
+	    characterEntity = repository.save(characterEntity);
+
+	    return mapCharacterEntityToCharacterEntityDto(characterEntity);
 	}
+
 	return null;
     }
 
@@ -141,5 +156,39 @@ public class CharacterService
     public boolean verifyHouseId(String id)
     {
 	return houseRestClient.verifyHouseId(id);
+    }
+
+    /**
+     * @param characterEntityDtoList
+     * @param characterEntityList
+     */
+    private List<CharacterEntityDto> mapCharacterEntityList(Iterable<CharacterEntity> characterEntityList)
+    {
+	List<CharacterEntityDto> characterEntityDtoList = new ArrayList<>();
+
+	characterEntityList.forEach(characterEntity ->
+	{
+	    CharacterEntityDto characterEntityDto = modelMapper.map(characterEntity, CharacterEntityDto.class);
+
+	    characterEntityDtoList.add(characterEntityDto);
+	});
+
+	return characterEntityDtoList;
+    }
+
+    /**
+     * @param characterEntity
+     */
+    private CharacterEntityDto mapCharacterEntityToCharacterEntityDto(CharacterEntity characterEntity)
+    {
+	return modelMapper.map(characterEntity, CharacterEntityDto.class);
+    }
+
+    /**
+     * @param characterEntityDto
+     */
+    private CharacterEntity mapCharacterEntityDtoToCharacterEntity(CharacterEntityDto characterEntityDto)
+    {
+	return modelMapper.map(characterEntityDto, CharacterEntity.class);
     }
 }

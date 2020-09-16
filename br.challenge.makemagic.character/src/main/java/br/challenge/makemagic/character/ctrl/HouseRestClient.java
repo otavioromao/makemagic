@@ -24,10 +24,10 @@ public class HouseRestClient
     private static final String API_URI = "{id}?key={key}";
 
     @Value("${potterapi_key}")
-    private String potterapi_key;
+    private String potterapiKey;
 
     @Value("${potterapi_houses_uri}")
-    private String potterapi_houses_uri;
+    private String potterapiHousesUri;
 
     private WebClient webClient = WebClient.builder().build();
 
@@ -39,14 +39,14 @@ public class HouseRestClient
      */
     public Boolean verifyHouseId(String id)
     {
-	LOG.debug("Find the house by Id {0}", id);
+	LOG.debug("Find the house by Id {}", id);
 
 	if (id == null)
 	{
 	    return false;
 	}
 
-	String url = potterapi_houses_uri;
+	String url = potterapiHousesUri;
 	if (!url.endsWith("/"))
 	{
 	    url += "/";
@@ -54,12 +54,12 @@ public class HouseRestClient
 
 	try
 	{
-	    Mono<HouseEntity[]> bodyToMonoResult = webClient.get().uri(url + API_URI, id, potterapi_key).retrieve()
+	    Mono<HouseEntity[]> bodyToMonoResult = webClient.get().uri(url + API_URI, id, potterapiKey).retrieve()
 		    .bodyToMono(HouseEntity[].class);
 
 	    HouseEntity[] house = bodyToMonoResult.block();
 
-	    LOG.debug("Find the house by Id {0}", id);
+	    LOG.debug("Find the house by Id {}", id);
 
 	    if (house != null && house.length > 0)
 	    {
@@ -67,7 +67,7 @@ public class HouseRestClient
 	    }
 	} catch (Exception e)
 	{
-	    LOG.debug("Exception thrown {0}", e);
+	    LOG.debug("Exception thrown {}", e);
 	}
 
 	return false;

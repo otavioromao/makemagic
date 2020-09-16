@@ -2,15 +2,11 @@
 // This is intended to solve a challenge to create a REST API to offers
 // CRUD functionalities for Harry Potter's characters.
 // **********************************************************************
-package br.challenge.makemagic.core.model;
+package br.challenge.makemagic.character.dto;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.GenericGenerator;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,15 +26,12 @@ import lombok.ToString;
 @Setter
 @ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@Entity(name = "characters")
-public class CharacterEntity implements BaseEntity
+public class CharacterEntityDto
 {
     /**
      * Specifies the Id for the entity.
      */
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
     @EqualsAndHashCode.Include
     private String id;
 

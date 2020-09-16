@@ -24,6 +24,7 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import br.challenge.makemagic.character.ctrl.HouseRestClient;
+import br.challenge.makemagic.character.dto.CharacterEntityDto;
 import br.challenge.makemagic.core.model.CharacterEntity;
 import br.challenge.makemagic.core.repository.CharacterRepository;
 
@@ -31,7 +32,7 @@ import br.challenge.makemagic.core.repository.CharacterRepository;
  * This class is responsible to test {@link CharacterService}.
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class CharacterServiceTest
+class CharacterServiceTest
 {
     private static final String HANNAH_ABBOTT_NAME_VALUE = "Hannah Abbott";
     private static final String HARRY_POTTER_NAME_VALUE = "Harry Potter";
@@ -58,7 +59,7 @@ public class CharacterServiceTest
     private int localServerPort;
 
     @Test
-    public void findAll_withTwoCharacters_shoudReturnTwoCharacters()
+    void findAll_withTwoCharacters_shoudReturnTwoCharacters()
     {
 	CharacterEntity characterOne = createCharacterEntity(HANNAH_ABBOTT_NAME_VALUE, STUDENT_VALUE, SCHOOL_NAME_VALUE,
 		HOUSE_NAME_VALUE, PATRONUS_VALUE);
@@ -71,14 +72,14 @@ public class CharacterServiceTest
 
 	when(characterRepository.findAll()).thenReturn(characters);
 
-	Iterable<CharacterEntity> response = characterService.findAll();
+	Iterable<CharacterEntityDto> response = characterService.findAll();
 
 	assertNotNull(response);
 	assertIterableEquals(response, characters);
     }
 
     @Test
-    public void findByHouse_withHouseParam_shoudReturnOneCharacter()
+    void findByHouse_withHouseParam_shoudReturnOneCharacter()
     {
 	CharacterEntity characterOne = createCharacterEntity(HANNAH_ABBOTT_NAME_VALUE, STUDENT_VALUE, SCHOOL_NAME_VALUE,
 		HOUSE_NAME_VALUE, PATRONUS_VALUE);
@@ -91,14 +92,14 @@ public class CharacterServiceTest
 
 	when(characterRepository.findByHouse(HOUSE_VALUE)).thenReturn(characters);
 
-	Iterable<CharacterEntity> response = characterService.findByHouse(HOUSE_VALUE);
+	Iterable<CharacterEntityDto> response = characterService.findByHouse(HOUSE_VALUE);
 
 	assertNotNull(response);
 	assertIterableEquals(response, characters);
     }
 
     @Test
-    public void addCharacter_withValidInput_shoudReturnCharacterSaved()
+    void addCharacter_withValidInput_shoudReturnCharacterSaved()
     {
 	CharacterEntity character = createCharacterEntity(HARRY_POTTER_NAME_VALUE, STUDENT_VALUE, SCHOOL_NAME_VALUE,
 		HOUSE_VALUE, PATRONUS_VALUE);
@@ -106,22 +107,25 @@ public class CharacterServiceTest
 	when(characterRepository.save(character)).thenReturn(character);
 	when(houseRestClient.verifyHouseId(HOUSE_VALUE)).thenReturn(true);
 
-	CharacterEntity response = (CharacterEntity) characterService.addCharacter(character);
+	CharacterEntityDto characterEntityDto = createCharacterEntityDto(HARRY_POTTER_NAME_VALUE, STUDENT_VALUE,
+		SCHOOL_NAME_VALUE, HOUSE_VALUE, PATRONUS_VALUE);
+
+	CharacterEntityDto response = (CharacterEntityDto) characterService.addCharacter(characterEntityDto);
 
 	assertNotNull(response);
 	assertEquals(response, character);
     }
 
     @Test
-    public void addCharacter_withNullBody_shoudReturnNotAcceptable()
+    void addCharacter_withNullBody_shoudReturnNotAcceptable()
     {
-	CharacterEntity response = characterService.addCharacter(null);
+	CharacterEntityDto response = characterService.addCharacter(null);
 
 	assertNull(response);
     }
 
     @Test
-    public void updateCharacter_withValidInput_shoudReturnCharacterSaved()
+    void updateCharacter_withValidInput_shoudReturnCharacterSaved()
     {
 	CharacterEntity character = createCharacterEntity(HARRY_POTTER_NAME_VALUE, STUDENT_VALUE, SCHOOL_NAME_VALUE,
 		HOUSE_VALUE, PATRONUS_VALUE);
@@ -133,7 +137,11 @@ public class CharacterServiceTest
 	when(characterRepository.save(character)).thenReturn(characterExpected);
 	when(houseRestClient.verifyHouseId(HOUSE_VALUE)).thenReturn(true);
 
-	CharacterEntity response = (CharacterEntity) characterService.updateCharacter(character, ID_VALUE);
+	CharacterEntityDto characterEntityDto = createCharacterEntityDto(HARRY_POTTER_NAME_VALUE, STUDENT_VALUE,
+		SCHOOL_NAME_VALUE, HOUSE_VALUE, PATRONUS_VALUE);
+
+	CharacterEntityDto response = (CharacterEntityDto) characterService.updateCharacter(characterEntityDto,
+		ID_VALUE);
 
 	assertNotNull(response);
 	assertEquals(response, characterExpected);
@@ -141,37 +149,37 @@ public class CharacterServiceTest
     }
 
     @Test
-    public void updateCharacter_withInvalidId_shoudReturnNotAcceptable()
+    void updateCharacter_withInvalidId_shoudReturnNotAcceptable()
     {
-	CharacterEntity character = createCharacterEntity(HARRY_POTTER_NAME_VALUE, STUDENT_VALUE, SCHOOL_NAME_VALUE,
-		HOUSE_VALUE, PATRONUS_VALUE);
+	CharacterEntityDto characterEntityDto = createCharacterEntityDto(HARRY_POTTER_NAME_VALUE, STUDENT_VALUE,
+		SCHOOL_NAME_VALUE, HOUSE_VALUE, PATRONUS_VALUE);
 
-	CharacterEntity response = characterService.updateCharacter(character, INVALID_ID_VALUE);
+	CharacterEntityDto response = characterService.updateCharacter(characterEntityDto, INVALID_ID_VALUE);
 
 	assertNull(response);
     }
 
     @Test
-    public void updateCharacter_withNullId_shoudReturnNotAcceptable()
+    void updateCharacter_withNullId_shoudReturnNotAcceptable()
     {
-	CharacterEntity character = createCharacterEntity(HARRY_POTTER_NAME_VALUE, STUDENT_VALUE, SCHOOL_NAME_VALUE,
-		HOUSE_VALUE, PATRONUS_VALUE);
+	CharacterEntityDto characterEntityDto = createCharacterEntityDto(HARRY_POTTER_NAME_VALUE, STUDENT_VALUE,
+		SCHOOL_NAME_VALUE, HOUSE_VALUE, PATRONUS_VALUE);
 
-	CharacterEntity response = characterService.updateCharacter(character, null);
+	CharacterEntityDto response = characterService.updateCharacter(characterEntityDto, null);
 
 	assertNull(response);
     }
 
     @Test
-    public void updateCharacter_withNullBody_shoudReturnNotAcceptable()
+    void updateCharacter_withNullBody_shoudReturnNotAcceptable()
     {
-	CharacterEntity response = characterService.updateCharacter(null, ID_VALUE);
+	CharacterEntityDto response = characterService.updateCharacter(null, ID_VALUE);
 
 	assertNull(response);
     }
 
     @Test
-    public void deleteCharacter_withValidId_shoudReturnNoContent()
+    void deleteCharacter_withValidId_shoudReturnNoContent()
     {
 	String id = ID_VALUE;
 
@@ -183,7 +191,7 @@ public class CharacterServiceTest
     }
 
     @Test
-    public void deleteCharacter_whenIdIsNull_shoudReturnNotAcceptable()
+    void deleteCharacter_whenIdIsNull_shoudReturnNotAcceptable()
     {
 	boolean characterDeleted = characterService.deleteCharacter(null);
 
@@ -191,7 +199,7 @@ public class CharacterServiceTest
     }
 
     @Test
-    public void deleteCharacter_withInvalidId_shoudReturnNotFound()
+    void deleteCharacter_withInvalidId_shoudReturnNotFound()
     {
 	Mockito.doThrow(EmptyResultDataAccessException.class).when(characterRepository).deleteById(anyString());
 
@@ -204,5 +212,12 @@ public class CharacterServiceTest
 	    String patronus)
     {
 	return CharacterEntity.builder().name(name).role(role).school(school).house(house).patronus(patronus).build();
+    }
+
+    private CharacterEntityDto createCharacterEntityDto(String name, String role, String school, String house,
+	    String patronus)
+    {
+	return CharacterEntityDto.builder().name(name).role(role).school(school).house(house).patronus(patronus)
+		.build();
     }
 }

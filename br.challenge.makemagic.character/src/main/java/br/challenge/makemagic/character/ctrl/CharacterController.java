@@ -4,8 +4,8 @@
 // **********************************************************************
 package br.challenge.makemagic.character.ctrl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,27 +15,26 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import br.challenge.makemagic.character.dto.CharacterEntityDto;
 import br.challenge.makemagic.character.exception.handling.ErrorMessage;
 import br.challenge.makemagic.character.service.CharacterService;
-import br.challenge.makemagic.core.model.CharacterEntity;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * This class is responsible to give support for REST API for CRUD
- * functionalities for {@link CharacterEntity Character}.
+ * functionalities for {@link CharacterEntityDto Character}.
  */
 @Controller
+@Slf4j
 @RequestMapping(path = "/v1/character")
 public class CharacterController
 {
-    private Logger LOG = LoggerFactory.getLogger(CharacterController.class);
-
-    private static final String HOUSE_ERROR_MESSAGE = "The house Id is not valid: %s";
+    private static final String HOUSE_ERROR_MESSAGE = "The house Id is not valid";
 
     @Autowired
     private CharacterService characterService;
@@ -48,18 +47,18 @@ public class CharacterController
      * @return The ResponseEntity with a list of characters and HttpStatus OK
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Iterable<CharacterEntity>> getCharacter(@RequestParam(required = false) String house)
+    public ResponseEntity<Iterable<CharacterEntityDto>> getCharacter(@RequestParam(required = false) String house)
     {
-	Iterable<CharacterEntity> characters = null;
+	Iterable<CharacterEntityDto> characters = null;
 
 	if (house != null)
 	{
-	    LOG.debug("Find characters by house {0}", house);
+	    log.debug("Find characters by house {}", house);
 
 	    characters = characterService.findByHouse(house);
 	} else
 	{
-	    LOG.debug("Find all characters", "");
+	    log.debug("Find all characters {}", "");
 
 	    characters = characterService.findAll();
 	}
@@ -70,118 +69,68 @@ public class CharacterController
     /**
      * Creates a character with the values specified in the parameter.
      *
-     * @param character The CharacterEntity with the character informations
+     * @param characterEntityDto The CharacterEntity with the character informations
      * @return The ResponseEntity with the character created and HttpStatus Created.
      *         If the request body is null then a Not Acceptable status is returned.
      *         If the Id of the house is invalid, then a Bad Request status is
      *         returned
      */
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> createCharacter(@RequestBody(required = false) CharacterEntity character)
+    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> createCharacter(@RequestBody @Valid CharacterEntityDto characterEntityDto)
     {
-	if (character == null)
-	{
-	    LOG.debug("Payload is null", "");
-
-	    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
-	}
-
-	if (!characterService.verifyHouseId(character.getHouse()))
+	if (!characterService.verifyHouseId(characterEntityDto.getHouse()))
 	{
 	    ErrorMessage errorMessage = new ErrorMessage(HttpStatus.BAD_REQUEST,
-		    String.format(HOUSE_ERROR_MESSAGE, character.getHouse()));
+		    String.format(HOUSE_ERROR_MESSAGE, characterEntityDto.getHouse()));
 
 	    return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
 	}
 
-	LOG.debug("Save character {0}", character);
+	log.debug("Save character {}", characterEntityDto);
 
-	CharacterEntity characterSaved = characterService.addCharacter(character);
+	CharacterEntityDto characterSaved = characterService.addCharacter(characterEntityDto);
 
-	return new ResponseEntity<CharacterEntity>(characterSaved, HttpStatus.CREATED);
+	return new ResponseEntity<>(characterSaved, HttpStatus.CREATED);
     }
 
     /**
      * Updates a character with the values specified in the parameter.
      *
-     * @param character The CharacterEntity with the character informations
-     * @param id        The Id of the character that will be updated
+     * @param characterEntityDto The CharacterEntity with the character informations
+     * @param id                 The Id of the character that will be updated
      * @return The ResponseEntity with the character updated and HttpStatus OK. If
      *         the request body is null or the Id is invalid, then a Not Acceptable
      *         status is returned. If the Id of the house is invalid, then a Bad
      *         Request status is returned
      */
     @PatchMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> patchCharacter(@RequestBody(required = false) CharacterEntity character,
+    public ResponseEntity<?> patchCharacter(@RequestBody @Valid CharacterEntityDto characterEntityDto,
 	    @PathVariable String id)
     {
-	if (character == null || id == null)
+	if (id == null)
 	{
-	    LOG.debug("Payload or character Id is null", "");
+	    log.debug("Character Id is null {}", "");
 
 	    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 	}
 
-	if (!characterService.verifyHouseId(character.getHouse()))
+	if (!characterService.verifyHouseId(characterEntityDto.getHouse()))
 	{
-	    ErrorMessage errorMessage = new ErrorMessage(HttpStatus.BAD_REQUEST,
-		    String.format(HOUSE_ERROR_MESSAGE, character.getHouse()));
+	    ErrorMessage errorMessage = new ErrorMessage(HttpStatus.BAD_REQUEST, HOUSE_ERROR_MESSAGE);
 
 	    return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
 	}
 
-	LOG.debug("Save character {0}", character);
+	log.debug("Save character {}", characterEntityDto);
 
-	CharacterEntity characterSaved = characterService.updateCharacter(character, id);
+	CharacterEntityDto characterSaved = characterService.updateCharacter(characterEntityDto, id);
 
 	if (characterSaved == null)
 	{
 	    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 	}
 
-	return new ResponseEntity<CharacterEntity>(characterSaved, HttpStatus.OK);
-    }
-
-    /**
-     * Updates a character with the values specified in the parameter.
-     *
-     * @param character The CharacterEntity with the character informations
-     * @param id        The Id of the character that will be updated
-     * @return The ResponseEntity with the character updated and HttpStatus OK. If
-     *         the request body is null or the Id is invalid, then a Not Acceptable
-     *         status is returned. If the Id of the house is invalid, then a Bad
-     *         Request status is returned
-     */
-    @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> putCharacter(@RequestBody(required = false) CharacterEntity character,
-	    @PathVariable String id)
-    {
-	if (character == null || id == null)
-	{
-	    LOG.debug("Payload or character Id is null", "");
-
-	    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
-	}
-
-	if (!characterService.verifyHouseId(character.getHouse()))
-	{
-	    ErrorMessage errorMessage = new ErrorMessage(HttpStatus.BAD_REQUEST,
-		    String.format(HOUSE_ERROR_MESSAGE, character.getHouse()));
-
-	    return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
-	}
-
-	LOG.debug("Save character {0}", character);
-
-	CharacterEntity characterSaved = characterService.updateCharacter(character, id);
-
-	if (characterSaved == null)
-	{
-	    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
-	}
-
-	return new ResponseEntity<CharacterEntity>(characterSaved, HttpStatus.OK);
-
+	return new ResponseEntity<>(characterSaved, HttpStatus.OK);
     }
 
     /**
@@ -197,7 +146,7 @@ public class CharacterController
     {
 	if (id == null)
 	{
-	    LOG.debug("Character Id is null", "");
+	    log.debug("Character Id is null {}", "");
 
 	    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 	}
