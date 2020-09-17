@@ -15,6 +15,10 @@
 	<name>br.challenge.makemagic.eureka</name>
 	<description>Service discovery for the microservices.</description>
 
+	<properties>
+		<heroku-app-name>eureka-rest-api</heroku-app-name>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -23,7 +27,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>discovery</finalName>
+		<finalName>${project.artifactId}-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

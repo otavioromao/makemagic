@@ -18,7 +18,6 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<heroku-app-name>character-rest-api</heroku-app-name>
 		<br.challenge.makemagic.version>1.0.1-SNAPSHOT</br.challenge.makemagic.version>
 		<java.version>1.8</java.version>
 		<org.hamcrest_hamcrest.version>2.1</org.hamcrest_hamcrest.version>

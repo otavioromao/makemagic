@@ -16,6 +16,10 @@
 	<name>br.challenge.makemagic.character</name>
 	<description>REST API for Harry Potter's characters.</description>
 
+	<properties>
+		<heroku-app-name>character-rest-api</heroku-app-name>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>br.challenge.makemagic</groupId>
@@ -40,7 +44,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>character</finalName>
+		<finalName>${project.artifactId}-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -48,13 +52,6 @@
 				<configuration>
 					<executable>true</executable>
 				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
