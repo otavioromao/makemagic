@@ -1,1 +1,1 @@
-web: java -Dserver.port=$PORT -jar $APP_JAR_PATH
+web: java -Dserver.port=$PORT -jar $APP_JAR_PATH --spring.profiles.active=$PROFILE_NAME
